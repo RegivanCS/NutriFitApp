@@ -16,6 +16,7 @@ class NutriFitRepository @Inject constructor(
     private val progressDao: ProgressDao,
     private val waterDao: WaterDao,
     private val achievementDao: AchievementDao,
+    private val mealScheduleDao: MealScheduleDao,
     private val pythonBridge: PythonBridge
 ) {
     // ==================== USUÁRIO ====================
@@ -40,7 +41,7 @@ class NutriFitRepository @Inject constructor(
     fun searchFoods(query: String) = foodDao.searchFoods(query)
     fun getFoodsByCategory(category: String) = foodDao.getFoodsByCategory(category)
     suspend fun getFoodByBarcode(barcode: String) = foodDao.getFoodByBarcode(barcode)
-    suspend fun insertFood(food: FoodEntity) = foodDao.insertFood(food)
+    suspend fun insertFood(food: FoodEntity) = foodDao.insert(food)
     suspend fun insertAllFoods(foods: List<FoodEntity>) = foodDao.insertAll(foods)
 
     // ==================== PROGRESSO ====================
@@ -60,6 +61,16 @@ class NutriFitRepository @Inject constructor(
     fun getUnseenCount(userId: Int) = achievementDao.getUnseenCount(userId)
     suspend fun insertAchievement(achievement: AchievementEntity) = 
         achievementDao.insertAchievement(achievement)
+
+    // ==================== AGENDAMENTO DE REFEIÇÕES ====================
+    fun getUserSchedules(userId: Int) = mealScheduleDao.getUserSchedules(userId)
+    suspend fun getUserSchedulesSync(userId: Int) = mealScheduleDao.getUserSchedulesSync(userId)
+    suspend fun getScheduleByTipo(userId: Int, tipo: String) = mealScheduleDao.getScheduleByTipo(userId, tipo)
+    suspend fun insertSchedule(schedule: MealScheduleEntity) = mealScheduleDao.insert(schedule)
+    suspend fun insertAllSchedules(schedules: List<MealScheduleEntity>) = mealScheduleDao.insertAll(schedules)
+    suspend fun updateSchedule(schedule: MealScheduleEntity) = mealScheduleDao.update(schedule)
+    suspend fun deleteSchedule(schedule: MealScheduleEntity) = mealScheduleDao.delete(schedule)
+    suspend fun deleteAllSchedules(userId: Int) = mealScheduleDao.deleteAllByUser(userId)
 
     // ==================== PYTHON ENGINE ====================
     fun calculateAll(

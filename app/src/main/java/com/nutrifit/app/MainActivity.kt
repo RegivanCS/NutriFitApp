@@ -55,7 +55,8 @@ fun NutriFitNavigation() {
                 onNavigateToDiary = { navController.navigate("diary") },
                 onNavigateToProgress = { navController.navigate("progress") },
                 onNavigateToProfile = { navController.navigate("profile") },
-                onNavigateToRecipes = { navController.navigate("recipes") }
+                onNavigateToRecipes = { navController.navigate("recipes") },
+                onNavigateToSchedule = { navController.navigate("schedule") }
             )
         }
 
@@ -79,6 +80,12 @@ fun NutriFitNavigation() {
 
         composable("recipes") {
             RecipesScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("schedule") {
+            ScheduleScreen(
                 onBack = { navController.popBackStack() }
             )
         }

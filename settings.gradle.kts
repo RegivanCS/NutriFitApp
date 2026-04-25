@@ -1,4 +1,5 @@
-﻿pluginManagement {
+﻿cd C:\NutriFitApp\NutriFitApp
+git commit -m "Initial commit - NutriFitApp"pluginManagement {
     repositories {
         google()
         mavenCentral()

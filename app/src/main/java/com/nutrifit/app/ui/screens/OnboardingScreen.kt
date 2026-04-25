@@ -14,19 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.nutrifit.app.data.local.entities.UserEntity
-import com.nutrifit.app.data.repository.NutriFitRepository
-import kotlinx.coroutines.launch
+import com.nutrifit.app.ui.viewmodel.OnboardingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
-    onComplete: () -> Unit
+    onComplete: () -> Unit,
+    viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     var currentStep by remember { mutableIntStateOf(0) }
     val totalSteps = 4
-    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val uiState by viewModel.uiState.collectAsState()
 
     // Estados dos campos
     var nome by remember { mutableStateOf("") }
@@ -41,6 +42,13 @@ fun OnboardingScreen(
     // Estados de validação
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+
+    // Navegar quando salvar
+    LaunchedEffect(uiState.isComplete) {
+        if (uiState.isComplete) {
+            onComplete()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -81,8 +89,8 @@ fun OnboardingScreen(
                         Surface(
                             modifier = Modifier.fillMaxSize(),
                             shape = MaterialTheme.shapes.small,
-                            color = if (step <= currentStep) 
-                                MaterialTheme.colorScheme.primary 
+                            color = if (step <= currentStep)
+                                MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.surfaceVariant
                         ) {}
                     }
@@ -149,23 +157,20 @@ fun OnboardingScreen(
                     objetivo = objetivo,
                     onObjetivoChange = { objetivo = it },
                     onFinish = {
-                        // Salvar usuário
-                        coroutineScope.launch {
-                            val user = UserEntity(
-                                nome = nome,
-                                idade = idade.toInt(),
-                                sexo = sexo,
-                                alturaCm = alturaCm.toDouble(),
-                                pesoInicialKg = pesoAtualKg.toDouble(),
-                                pesoAtualKg = pesoAtualKg.toDouble(),
-                                pesoMetaKg = pesoMetaKg.toDouble(),
-                                nivelAtividade = nivelAtividade,
-                                objetivo = objetivo
-                            )
-                            // Aqui deveria salvar via ViewModel/Repository
-                            onComplete()
-                        }
-                    }
+                        val user = UserEntity(
+                            nome = nome,
+                            idade = idade.toInt(),
+                            sexo = sexo,
+                            alturaCm = alturaCm.toDouble(),
+                            pesoInicialKg = pesoAtualKg.toDouble(),
+                            pesoAtualKg = pesoAtualKg.toDouble(),
+                            pesoMetaKg = pesoMetaKg.toDouble(),
+                            nivelAtividade = nivelAtividade,
+                            objetivo = objetivo
+                        )
+                        viewModel.salvarUsuario(user)
+                    },
+                    isLoading = uiState.isLoading
                 )
             }
 
@@ -174,6 +179,16 @@ fun OnboardingScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            // Mensagem de erro do salvamento
+            if (uiState.mensagemErro != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = uiState.mensagemErro!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -247,7 +262,7 @@ private fun StepPersonalData(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         OutlinedTextField(
             value = idade,
             onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 3) onIdadeChange(it) },
@@ -258,7 +273,7 @@ private fun StepPersonalData(
             singleLine = true
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Text("Sexo biológico", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -282,7 +297,7 @@ private fun StepPersonalData(
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         OutlinedTextField(
             value = alturaCm,
             onValueChange = { if (it.all { c -> c.isDigit() || c == '.' } && it.length <= 5) onAlturaChange(it) },
@@ -294,7 +309,7 @@ private fun StepPersonalData(
             suffix = { Text("cm") }
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
             Text("Continuar")
         }
@@ -316,7 +331,7 @@ private fun StepWeightGoals(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         OutlinedTextField(
             value = pesoAtualKg,
             onValueChange = { if (it.all { c -> c.isDigit() || c == '.' } && it.length <= 6) onPesoAtualChange(it) },
@@ -328,7 +343,7 @@ private fun StepWeightGoals(
             suffix = { Text("kg") }
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         OutlinedTextField(
             value = pesoMetaKg,
             onValueChange = { if (it.all { c -> c.isDigit() || c == '.' } && it.length <= 6) onPesoMetaChange(it) },
@@ -340,7 +355,7 @@ private fun StepWeightGoals(
             suffix = { Text("kg") }
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         if (pesoAtualKg.toDoubleOrNull() != null && pesoMetaKg.toDoubleOrNull() != null) {
             val diferenca = pesoAtualKg.toDouble() - pesoMetaKg.toDouble()
             if (diferenca > 0) {
@@ -356,7 +371,7 @@ private fun StepWeightGoals(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
             Text("Continuar")
@@ -370,7 +385,8 @@ private fun StepActivityAndGoal(
     onNivelChange: (String) -> Unit,
     objetivo: String,
     onObjetivoChange: (String) -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    isLoading: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -379,10 +395,10 @@ private fun StepActivityAndGoal(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Text("Nível de atividade física", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         val atividades = listOf(
             "sedentario" to "Sedentário",
             "levemente_ativo" to "Leve",
@@ -390,7 +406,7 @@ private fun StepActivityAndGoal(
             "muito_ativo" to "Intenso",
             "extremamente_ativo" to "Extremo"
         )
-        
+
         atividades.forEach { (key, label) ->
             Row(
                 modifier = Modifier
@@ -409,12 +425,12 @@ private fun StepActivityAndGoal(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Text("Seu objetivo principal", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(
                 selected = objetivo == "emagrecer",
@@ -435,19 +451,28 @@ private fun StepActivityAndGoal(
                 modifier = Modifier.weight(1f)
             )
         }
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         Button(
             onClick = onFinish,
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Icon(Icons.Default.Check, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Finalizar Cadastro!")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(Icons.Default.Check, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Finalizar Cadastro!")
+            }
         }
     }
 }

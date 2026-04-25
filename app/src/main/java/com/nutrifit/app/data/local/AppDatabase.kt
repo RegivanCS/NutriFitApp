@@ -14,9 +14,10 @@ import com.nutrifit.app.data.local.entities.*
         FoodEntity::class,
         ProgressEntity::class,
         WaterEntity::class,
-        AchievementEntity::class
+        AchievementEntity::class,
+        MealScheduleEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -27,6 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
     abstract fun waterDao(): WaterDao
     abstract fun achievementDao(): AchievementDao
+    abstract fun mealScheduleDao(): MealScheduleDao
 
     companion object {
         @Volatile
