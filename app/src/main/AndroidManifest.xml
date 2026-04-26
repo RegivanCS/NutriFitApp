@@ -14,7 +14,7 @@
         android:name='.NutriFitApp'
         android:allowBackup='true'
         android:icon='@mipmap/ic_launcher'
-        android:label='NutriFit'
+        android:label='Vitaal'
         android:roundIcon='@mipmap/ic_launcher_round'
         android:supportsRtl='true'
         android:theme='@style/Theme.NutriFitApp'
@@ -30,7 +30,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Receivers para alarmes de notificação -->
         <receiver
             android:name='.notification.MealAlarmReceiver'
             android:exported='false' />

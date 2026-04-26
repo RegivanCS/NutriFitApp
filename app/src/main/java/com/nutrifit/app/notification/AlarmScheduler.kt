@@ -12,10 +12,10 @@ import java.util.Calendar
  * Usa AlarmManager para disparar no horário exato.
  */
 class MealAlarmReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent?) {
-        val tipo = intent?.getStringExtra("EXTRA_TIPO") ?: return
-        val nome = intent?.getStringExtra("EXTRA_NOME") ?: ""
-        val objetivo = intent?.getStringExtra("EXTRA_OBJETIVO") ?: "emagrecer"
+    override fun onReceive(context: Context, intent: Intent) {
+        val tipo = intent.getStringExtra("EXTRA_TIPO") ?: return
+        val nome = intent.getStringExtra("EXTRA_NOME") ?: ""
+        val objetivo = intent.getStringExtra("EXTRA_OBJETIVO") ?: "emagrecer"
 
         val notificationHelper = NotificationHelper(context)
         notificationHelper.showMealReminder(tipo, nome, objetivo)
@@ -23,7 +23,7 @@ class MealAlarmReceiver : BroadcastReceiver() {
 }
 
 class ExerciseAlarmReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent) {
         val notificationHelper = NotificationHelper(context)
         notificationHelper.showExerciseReminder()
     }

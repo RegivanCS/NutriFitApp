@@ -12,7 +12,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.nutrifit.app'
+        applicationId 'com.vitaal.saude'
         minSdk 26
         targetSdk 34
         versionCode 1
@@ -21,13 +21,6 @@ android {
 
         ndk {
             abiFilters 'arm64-v8a', 'x86_64'
-        }
-
-        python {
-            // numpy was causing build issues and is not currently used in the scripts
-            // pip {
-            //     install 'numpy'
-            // }
         }
     }
 

@@ -103,6 +103,7 @@ class NotificationHelper(private val context: Context) {
     /**
      * Mostra notificação de lembrete de refeição com som, vibração e dica do que comer.
      */
+    @Suppress("UNUSED_PARAMETER")
     fun showMealReminder(tipo: String, nome: String, objetivo: String = "emagrecer") {
         val nomeRefeicao = nomesRefeicoes[tipo] ?: tipo
         val mensagens = mensagensRefeicoes[tipo] ?: mensagensRefeicoes["cafe_da_manha"]!!
@@ -112,7 +113,7 @@ class NotificationHelper(private val context: Context) {
         val dica = dicas.random()
 
         // Se tem nome de receita específico da recomendação, usar ele
-        val textoCompleto = if (nome.isNotBlank() && nome != tipo) {
+        val textoCompleto = if (nome.isNotBlank() && (nome != tipo)) {
             "$mensagem\n\n🍽️ Hora de comer:\n📌 $nome\n💡 $dica"
         } else {
             "$mensagem\n\n💡 $dica"

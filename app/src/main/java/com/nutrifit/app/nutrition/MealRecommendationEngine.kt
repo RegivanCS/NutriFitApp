@@ -79,6 +79,7 @@ object MealRecommendationEngine {
 
     // ==================== RECOMENDAÇÕES POR OBJETIVO ====================
 
+    @Suppress("UNUSED_PARAMETER")
     private fun recomendarCafe(objetivo: String, caloriasMeta: Double): RefeicaoRecomendada {
         val base = when (objetivo) {
             "emagrecer" -> RefeicaoRecomendada(
@@ -148,6 +149,7 @@ object MealRecommendationEngine {
         return base
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun recomendarLancheManha(objetivo: String, caloriasMeta: Double): RefeicaoRecomendada {
         return when (objetivo) {
             "emagrecer" -> RefeicaoRecomendada(
@@ -216,6 +218,7 @@ object MealRecommendationEngine {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun recomendarAlmoco(objetivo: String, caloriasMeta: Double, peso: Double): RefeicaoRecomendada {
         val protBase = if (objetivo == "ganhar_massa") (peso * 0.4).toInt() else (peso * 0.3).toInt()
         return when (objetivo) {
@@ -288,6 +291,7 @@ object MealRecommendationEngine {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun recomendarLancheTarde(objetivo: String, caloriasMeta: Double): RefeicaoRecomendada {
         return when (objetivo) {
             "emagrecer" -> RefeicaoRecomendada(
@@ -358,6 +362,7 @@ object MealRecommendationEngine {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun recomendarJantar(objetivo: String, caloriasMeta: Double): RefeicaoRecomendada {
         return when (objetivo) {
             "emagrecer" -> RefeicaoRecomendada(
