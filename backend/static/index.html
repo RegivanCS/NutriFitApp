@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vitaal - Nutrição Inteligente</title>
+    <meta name="description" content="App de nutrição personalizada com recomendações inteligentes">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        .topo {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        .topo h1 { font-size: 24px; margin-bottom: 4px; }
+        .topo p { font-size: 14px; opacity: 0.9; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card h2 { font-size: 18px; margin-bottom: 12px; color: #4CAF50; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #555; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn:hover { box-shadow: 0 4px 12px rgba(76,175,80,0.4); }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+
+        .metas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .meta-item {
+            background: #f0faf0;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .meta-item .valor { font-size: 24px; font-weight: 700; color: #4CAF50; }
+        .meta-item .label { font-size: 12px; color: #666; margin-top: 2px; }
+
+        .recomendacao {
+            background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+            border-left: 4px solid #FFB300;
+            padding: 16px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 12px;
+        }
+        .recomendacao .nome { font-size: 16px; font-weight: 600; }
+        .recomendacao .descricao { font-size: 13px; color: #555; margin-top: 4px; }
+        .recomendacao .explicacao { font-size: 12px; color: #777; margin-top: 8px; font-style: italic; }
+        .recomendacao .macros {
+            display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
+        }
+        .recomendacao .macro {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .tab {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .nav-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 11px;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: #4CAF50; }
+        .nav-item .emoji { font-size: 22px; display: block; margin-bottom: 2px; }
+
+        .hidden { display: none; }
+
+        .progresso-ring {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .progresso-ring svg { transform: rotate(-90deg); }
+        .progresso-ring .valor {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: 700;
+            color: #4CAF50;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #121212; color: #e0e0e0; }
+            .card { background: #1e1e1e; }
+            .form-group input, .form-group select { background: #2c2c2c; border-color: #444; color: #e0e0e0; }
+            .meta-item { background: #1a2e1a; }
+            .nav-bottom { background: #1e1e1e; border-color: #333; }
+            .recomendacao { background: linear-gradient(135deg, #2a2410, #1e1a0c); }
+            .recomendacao .macro { background: #333; }
+            .tab { background: #2c2c2c; border-color: #444; color: #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="topo">
+    <h1>🌿 Vitaal</h1>
+    <p>Nutrição Inteligente Personalizada</p>
+</div>
+
+<div class="container">
+    <!-- Tabs de navegação -->
+    <div class="tabs" id="tabs">
+        <div class="tab active" onclick="mostrarAba('perfil')">👤 Perfil</div>
+        <div class="tab" onclick="mostrarAba('metas')">📊 Metas</div>
+        <div class="tab" onclick="mostrarAba('refeicoes')">🍽️ Refeições</div>
+    </div>
+
+    <!-- ABA PERFIL -->
+    <div id="aba-perfil">
+        <div class="card">
+            <h2>📝 Seus Dados</h2>
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" id="nome" placeholder="Seu nome" value="Usuário">
+            </div>
+            <div class="form-group">
+                <label>Peso (kg)</label>
+                <input type="number" id="peso" placeholder="Ex: 70" step="0.1" value="70">
+            </div>
+            <div class="form-group">
+                <label>Altura (cm)</label>
+                <input type="number" id="altura" placeholder="Ex: 170" value="170">
+            </div>
+            <div class="form-group">
+                <label>Idade</label>
+                <input type="number" id="idade" placeholder="Ex: 30" value="30">
+            </div>
+            <div class="form-group">
+                <label>Sexo</label>
+                <select id="sexo">
+                    <option value="M">Masculino</option>
+                    <option value="F" selected>Feminino</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nível de Atividade</label>
+                <select id="atividade">
+                    <option value="sedentario">Sedentário</option>
+                    <option value="levemente_ativo" selected>Levemente Ativo</option>
+                    <option value="moderadamente_ativo">Moderadamente Ativo</option>
+                    <option value="muito_ativo">Muito Ativo</option>
+                    <option value="extremamente_ativo">Extremamente Ativo</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Objetivo</label>
+                <select id="objetivo">
+                    <option value="emagrecer" selected>🔥 Emagrecer</option>
+                    <option value="manter">⚖️ Manter Peso</option>
+                    <option value="ganhar_massa">💪 Ganhar Massa</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Peso Meta (kg) - opcional</label>
+                <input type="number" id="pesoMeta" placeholder="Ex: 60" step="0.1">
+            </div>
+            <button class="btn" onclick="calcular()">🚀 Calcular Metas</button>
+        </div>
+    </div>
+
+    <!-- ABA METAS -->
+    <div id="aba-metas" class="hidden">
+        <div class="card">
+            <h2>📊 Suas Metas Diárias</h2>
+            <div id="metasDisplay"></div>
+        </div>
+
+        <div class="card">
+            <h2>🍽️ Sugestões do Dia</h2>
+            <div id="sugestoesDisplay">
+                <p style="color:#999; text-align:center; padding:20px;">
+                    Calcule suas metas primeiro! 👆
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA REFEIÇÕES -->
+    <div id="aba-refeicoes" class="hidden">
+        <div class="card">
+            <h2>⏰ Horários das Refeições</h2>
+            <p style="font-size:13px; color:#666; margin-bottom:12px;">
+                Defina seus horários e veja o que comer em cada refeição!
+            </p>
+
+            <div id="horariosRefeicoes"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dadosUsuario = {};
+    let sugestoes = {};
+
+    async function calcular() {
+        const dados = {
+            nome: document.getElementById("nome").value,
+            peso: parseFloat(document.getElementById("peso").value),
+            altura: parseFloat(document.getElementById("altura").value),
+            idade: parseInt(document.getElementById("idade").value),
+            sexo: document.getElementById("sexo").value,
+            atividade: document.getElementById("atividade").value,
+            objetivo: document.getElementById("objetivo").value,
+            peso_meta: parseFloat(document.getElementById("pesoMeta").value) || null
+        };
+
+        dadosUsuario = dados;
+
+        try {
+            const res = await fetch("/api/calcular", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(dados)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const m = data.metas;
+                document.getElementById("metasDisplay").innerHTML = `
+                    <div class="metas-grid">
+                        <div class="meta-item">
+                            <div class="valor">${m.calorias_meta}</div>
+                            <div class="label">🔥 Calorias/dia</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="valor">${m.proteinas_g}g</div>
+                            <div class="label">🥩 Proteínas</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="valor">${m.carboidratos_g}g</div>
+                            <div class="label">🍚 Carboidratos</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="valor">${m.gorduras_g}g</div>
+                            <div class="label">🥑 Gorduras</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px; padding:12px; background:#E3F2FD; border-radius:8px; text-align:center;">
+                        💧 Beba <strong>${m.agua_ml}ml</strong> de água por dia (${Math.round(m.agua_ml/200)} copos)
+                    </div>
+                    <div style="margin-top:8px; font-size:12px; color:#666;">
+                        TMB: ${m.tmb} kcal | GET: ${m.get} kcal | Objetivo: ${m.objetivo}
+                    </div>
+                `;
+
+                carregarSugestoes(dados.objetivo);
+                mostrarAba("metas");
+            }
+        } catch(e) {
+            alert("Erro ao calcular: " + e.message);
+        }
+    }
+
+    async function carregarSugestoes(objetivo) {
+        try {
+            const res = await fetch("/api/sugestoes", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({objetivo})
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                sugestoes = data.sugestoes;
+                exibirSugestoes();
+                exibirHorarios();
+            }
+        } catch(e) {
+            console.error("Erro sugestoes:", e);
+        }
+    }
+
+    function exibirSugestoes() {
+        let html = "";
+        const nomes = {
+            "cafe_da_manha": "☕ Café da Manhã",
+            "almoco": "🍗 Almoço",
+            "jantar": "🥗 Jantar"
+        };
+
+        for (const [tipo, rec] of Object.entries(sugestoes)) {
+            html += `
+                <div class="recomendacao">
+                    <div class="nome">${nomes[tipo] || tipo}</div>
+                    <div style="font-size:18px; font-weight:700; margin-top:4px;">${rec.nome}</div>
+                    <div class="descricao">${rec.descricao}</div>
+                    <div class="macros">
+                        <span class="macro" style="color:#e53935;">🔥 ${rec.calorias} kcal</span>
+                        <span class="macro" style="color:#1E88E5;">🥩 ${rec.proteinas}g</span>
+                        <span class="macro" style="color:#FB8C00;">🍚 ${rec.carboidratos}g</span>
+                        <span class="macro" style="color:#43A047;">🥑 ${rec.gorduras}g</span>
+                    </div>
+                    <div class="explicacao">💡 ${rec.explicacao}</div>
+                </div>
+            `;
+        }
+        document.getElementById("sugestoesDisplay").innerHTML = html;
+    }
+
+    function exibirHorarios() {
+        const horarios = [
+            {tipo: "cafe_da_manha", nome: "☕ Café da Manhã", hora: "07:00"},
+            {tipo: "lanche_manha", nome: "🍎 Lanche da Manhã", hora: "09:30"},
+            {tipo: "almoco", nome: "🍗 Almoço", hora: "12:00"},
+            {tipo: "lanche_tarde", nome: "🥜 Lanche da Tarde", hora: "15:30"},
+            {tipo: "jantar", nome: "🥗 Jantar", hora: "19:00"},
+            {tipo: "ceia", nome: "🌙 Ceia", hora: "21:30"}
+        ];
+
+        let html = "";
+        for (const ref of horarios) {
+            const rec = sugestoes[ref.tipo];
+            html += `
+                <div style="background: #f9f9f9; border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #4CAF50;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>${ref.nome}</strong>
+                        <span style="font-size:20px; font-weight:700; color:#4CAF50;">${ref.hora}</span>
+                    </div>
+                    ${rec ? `
+                        <div style="margin-top:8px; padding:8px; background:white; border-radius:8px;">
+                            <div style="font-weight:600; font-size:14px;">${rec.nome}</div>
+                            <div style="font-size:12px; color:#666;">${rec.descricao}</div>
+                            <div style="font-size:11px; color:#888; margin-top:4px;">💡 ${rec.explicacao.substring(0,80)}...</div>
+                        </div>
+                    ` : ""}
+                </div>
+            `;
+        }
+        document.getElementById("horariosRefeicoes").innerHTML = html;
+    }
+
+    function mostrarAba(nome) {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll('[id^="aba-"]').forEach(a => a.classList.add("hidden"));
+
+        document.querySelector(`.tab[onclick*="${nome}"]`).classList.add("active");
+        document.getElementById(`aba-${nome}`).classList.remove("hidden");
+    }
+
+    // Carregar dados iniciais
+    document.addEventListener("DOMContentLoaded", () => {
+        // Registrar service worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    });
+</script>
+
+</body>
+</html>
